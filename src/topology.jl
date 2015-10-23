@@ -72,12 +72,17 @@ end
 function graphene_generator(N,C)
     CC_bond = 1                             # Length of C-C bond
     xproj = CC_bond * cos(pi/6)             # Projection of carbon atom on x-axis
-    zproj = CC_bond * cos(pi/3)
+    zproj = CC_bond * cos(pi/3)             # Projection of carbon atom on z-axis
     xyz = zeros(N*C,3)
     xyz[:,1] = repmat([0:xproj:xproj*(N-1)],C,1)
-    ztmp = [repmat([zproj,0],convert(Int64,N/2),1),repmat([zproj+CC_bond,2*CC_bond],convert(Int64,N/2),1)]
-    for j = 1:2:C
-        xyz[(j-1)*N+1:(j+1)*N,3] = ztmp+(j-1)*3/2*CC_bond
+    ztmp0 = repmat([zproj,0],convert(Int64,N/2),1)
+    ztmp1 = repmat([zproj+CC_bond,2*CC_bond],convert(Int64,N/2),1)
+    for j = 1:C       # ERROR: should add polyene chains one by one
+        if j%2 == 1
+            xyz[(j-1)*N+1:j*N,3] = ztmp0+(j-1)*3/2*CC_bond
+        elseif j%2 == 0
+            xyz[(j-1)*N+1:j*N,3] = ztmp1+(j-2)*3/2*CC_bond
+        end
     end
 
     ## Construct connections
@@ -88,12 +93,12 @@ function graphene_generator(N,C)
                 push!(bonds,(i+(j-1)*N,i+1+(j-1)*N))
                 push!(bonds,(i+1+(j-1)*N,i+(j-1)*N))
             end
-            if j%2 == 1 && i%2 == 1 && i < N
-                push!(bonds,(i+(j-1)*N,i+j*N))
-                push!(bonds,(i+j*N,i+(j-1)*N))
+            if j%2 == 1 && i%2 == 1 && i < N && j < C
+                push!(bonds,(i+(j-1)*N,(i+j*N)%(N*C)))
+                push!(bonds,((i+j*N)%(N*C),i+(j-1)*N))
             elseif j%2 == 0 && i%2 == 0 && j < C
-                push!(bonds,(i+(j-1)*N,i+j*N))
-                push!(bonds,(i+j*N,i+(j-1)*N))
+                push!(bonds,(i+(j-1)*N,(i+j*N)))
+                push!(bonds,((i+j*N),i+(j-1)*N))
             end
         end
     end
@@ -117,16 +122,34 @@ function nanotube_generator(n,m,l)
     else
         throw("Chiral nanotubes not supported yet!")
     end
-    println(N," ",C)
     graphene = graphene_generator(N,C)
-    xgr = graphene.xyz[:,1]
-    z = graphene.xyz[:,3]
-    CC_bond = z[N+1]-z[1]
-    fac = (maximum(xgr)+CC_bond)/(2*pi)
-    x = fac * cos(1/fac * xgr)
-    y = fac * sin(1/fac * xgr)
+    bonds = graphene.bonds
+    println("graphene bonds: ", size(bonds))
+    xyz = graphene.xyz
+    if n == m
+        throw("Wait for it..")
+    elseif m == 0
+        xgr = graphene.xyz[:,1]
+        z = graphene.xyz[:,3]
+        CC_bond = z[N+1]-z[1]
+        fac = (maximum(xgr)+CC_bond)/(2*pi)
+        x = fac * cos(1/fac * xgr)
+        y = fac * sin(1/fac * xgr)
+        for j = 1:C
+            #if j%2 == 1
+                push!(bonds,(1+(j-1)*N,j*N))
+                push!(bonds,(j*N,1+(j-1)*N))
+            #else
+            #    push!(bonds,(1+(j-1)*N,j*N))
+            #    push!(bonds,(j*N,1+(j-1)*N))
+            #end
+        end
+        xyz = [x y z]
+    else
+        throw("I don't know you got here!")
+    end
 
-    ret = Topology(graphene.bonds, [x y z])
+    ret = Topology(bonds, [x y z])
     return ret
 end
 
