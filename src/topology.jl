@@ -5,7 +5,7 @@ type Topology
     xyz::Array{Float64}
 end
 
-function PolyeneChainGenerator(nsites, bond_ratio, two_bond_length)
+function polyene_generator(nsites, bond_ratio, two_bond_length)
     ## Construct geometry
     xyz = zeros(nsites,3)
     long_bond = bond_ratio * two_bond_length / (1 + bond_ratio)         # Find the length of the longer bond
@@ -69,8 +69,7 @@ function nanotube_geometry(n,m,l)
     return xcirc,ycirc
 end
 
-function graphene(n,m,l)
-    H,N,C = nanotube(n,m,l)                 # Compute tight-binding Hamiltonian
+function graphene_generator(N,C)
     CC_bond = 1                             # Length of C-C bond
     xproj = CC_bond * cos(pi/6)             # Projection of carbon atom on x-axis
     zproj = CC_bond * cos(pi/3)
@@ -84,10 +83,12 @@ function graphene(n,m,l)
     ## Construct connections
     bonds = Array(Tuple,0)
     for j = 1:C
-        for i = 1:N-1
-            push!(bonds,(i+(j-1)*N,i+1+(j-1)*N))
-            push!(bonds,(i+1+(j-1)*N,i+(j-1)*N))
-            if j%2 == 1 && i%2 == 1
+        for i = 1:N
+            if i < N
+                push!(bonds,(i+(j-1)*N,i+1+(j-1)*N))
+                push!(bonds,(i+1+(j-1)*N,i+(j-1)*N))
+            end
+            if j%2 == 1 && i%2 == 1 && i < N
                 push!(bonds,(i+(j-1)*N,i+j*N))
                 push!(bonds,(i+j*N,i+(j-1)*N))
             elseif j%2 == 0 && i%2 == 0 && j < C
@@ -103,14 +104,41 @@ function graphene(n,m,l)
     return ret
 end
 
-function plot_geometry(topology)
+function nanotube_generator(n,m,l)
+    assert(n+m>3 || n>4)
+    if n == m
+        println("Armchair nanotube")
+        N = (l+1)*2     # Polyene chain length
+        C = n+m+2       # Number of polyene chains
+    elseif m == 0
+        println("Zigzag nanotube")
+        N = n*2
+        C = l+1
+    else
+        throw("Chiral nanotubes not supported yet!")
+    end
+    println(N," ",C)
+    graphene = graphene_generator(N,C)
+    xgr = graphene.xyz[:,1]
+    z = graphene.xyz[:,3]
+    CC_bond = z[N+1]-z[1]
+    fac = (maximum(xgr)+CC_bond)/(2*pi)
+    x = fac * cos(1/fac * xgr)
+    y = fac * sin(1/fac * xgr)
+
+    ret = Topology(graphene.bonds, [x y z])
+    return ret
+end
+
+function plot_topology(topology)
     x = topology.xyz[:,1]
+    y = topology.xyz[:,2]
     z = topology.xyz[:,3]
     edges = topology.bonds
-    # Winston.hold(true)
+    hold(true)
     for i in edges
-        Winston.plot([x[i[1]],x[i[2]]],[z[i[1]],z[i[2]]])
+        plot3D([x[i[1]],x[i[2]]],[y[i[1]],y[i[2]]],[z[i[1]],z[i[2]]],"-*k")
     end
-    Winston.plot(x,z)
-    # hold(false);
+    axis(xmin=minimum(x)-1,xmax=maximum(x)+1,ymin=minimum(y)-1,ymax=maximum(y)+1,zmin=minimum(z)-1,zmax=maximum(z)+1)
+    hold(false)
 end
