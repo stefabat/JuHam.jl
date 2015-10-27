@@ -1,10 +1,12 @@
-## Topology
+## Topology objects
 
+# Base composite type describing a topology
 type Topology
-    bonds::Array{Tuple}
-    xyz::Array{Float64}
+    bonds::Array{Tuple}         # Array of tuples. Each tuple describes a bond between two atoms
+    xyz::Array{Float64}         # N x 3 matrix containing the x, y and z coordinates in the 1st, 2nd and 3rd column, respectively
 end
 
+# Generate the topology of a polyene chain of length nsites
 function polyene_generator(nsites, bond_ratio, two_bond_length)
     ## Construct geometry
     xyz = zeros(nsites,3)
@@ -21,7 +23,7 @@ function polyene_generator(nsites, bond_ratio, two_bond_length)
         xyz[i,1] = x
         xyz[i,2] = y
     end
-    xyz[:,2] = flipud(xyz[:,2])                                 # Flip elements such that first bond goes downward (convention)
+    xyz[:,2] = flipdim(xyz[:,2],1)                                 # Flip elements such that first bond goes downward (convention)
     xyz[:,1] = xyz[:,1] - xproj*(nsites-1)/2                    # Shift molecules, such that origin is in the middle of the chain
 
     ## Construct connections
@@ -37,6 +39,7 @@ function polyene_generator(nsites, bond_ratio, two_bond_length)
     return ret
 end
 
+# TODO: remove this function. Obsolete!
 function nanotube_geometry(n,m,l)
     H,N,C = nanotube(n,m,l)                 # Compute tight-binding Hamiltonian
     CC_bond = 1                             # Length of C-C bond
@@ -69,14 +72,15 @@ function nanotube_geometry(n,m,l)
     return xcirc,ycirc
 end
 
+# Generate the topology of a graphene sheet of with C polyene chaines, each of length N
 function graphene_generator(N,C)
     CC_bond = 1                             # Length of C-C bond
     xproj = CC_bond * cos(pi/6)             # Projection of carbon atom on x-axis
     zproj = CC_bond * cos(pi/3)             # Projection of carbon atom on z-axis
     xyz = zeros(N*C,3)
-    xyz[:,1] = repmat([0:xproj:xproj*(N-1)],C,1)
-    ztmp0 = repmat([zproj,0],convert(Int64,N/2),1)
-    ztmp1 = repmat([zproj+CC_bond,2*CC_bond],convert(Int64,N/2),1)
+    xyz[:,1] = repmat(collect(0:xproj:xproj*(N-1)),C,1)
+    ztmp0 = repmat([zproj;0],convert(Int64,N/2),1)
+    ztmp1 = repmat([zproj+CC_bond;2*CC_bond],convert(Int64,N/2),1)
     for j = 1:C       # ERROR: should add polyene chains one by one
         if j%2 == 1
             xyz[(j-1)*N+1:j*N,3] = ztmp0+(j-1)*3/2*CC_bond
@@ -109,6 +113,7 @@ function graphene_generator(N,C)
     return ret
 end
 
+# Generate the topology of a (n,m) nanotube of length l
 function nanotube_generator(n,m,l)
     assert(n+m>3 || n>4)
     if n == m
@@ -124,10 +129,22 @@ function nanotube_generator(n,m,l)
     end
     graphene = graphene_generator(N,C)
     bonds = graphene.bonds
-    println("graphene bonds: ", size(bonds))
+    #println("graphene bonds: ", size(bonds))
     xyz = graphene.xyz
-    if n == m
-        throw("Wait for it..")
+    if n == m               # Armchair nanotube
+        z = graphene.xyz[:,1]           # Note that the x-axis of graphene becomes the z-axis
+        xgr = graphene.xyz[:,3]         # And viceversa
+        CC_bond = xgr[N+1]-xgr[1]
+        fac = (maximum(xgr)+CC_bond)/(2*pi)         # Compute factor for nanotube radius
+        x = fac * cos(1/fac * xgr)                  # Roll x- and y-axis of graphene sheet
+        y = fac * sin(1/fac * xgr)
+        for i = 1:N                     # Add new bonds connecting the edgese to the list
+            if i%2 == 0
+                push!(bonds,(i,i+(C-1)*N))
+                push!(bonds,(i+(C-1)*N,i))
+            end
+        end
+        xyz = [x y z]
     elseif m == 0
         xgr = graphene.xyz[:,1]
         z = graphene.xyz[:,3]
@@ -136,23 +153,19 @@ function nanotube_generator(n,m,l)
         x = fac * cos(1/fac * xgr)
         y = fac * sin(1/fac * xgr)
         for j = 1:C
-            #if j%2 == 1
                 push!(bonds,(1+(j-1)*N,j*N))
                 push!(bonds,(j*N,1+(j-1)*N))
-            #else
-            #    push!(bonds,(1+(j-1)*N,j*N))
-            #    push!(bonds,(j*N,1+(j-1)*N))
-            #end
         end
         xyz = [x y z]
     else
         throw("I don't know you got here!")
     end
 
-    ret = Topology(bonds, [x y z])
+    ret = Topology(bonds, [x y z])      # Create return Topology object
     return ret
 end
 
+# Simple helper function to visualize any topology
 function plot_topology(topology)
     x = topology.xyz[:,1]
     y = topology.xyz[:,2]
