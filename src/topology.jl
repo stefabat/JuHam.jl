@@ -2,8 +2,19 @@
 
 # Base composite type describing a topology
 type Topology
+    xyz::Array{Float64}         # N x ndim matrix containing the x, y and z coordinates in the 1st, 2nd and 3rd column, respectively
+    ndim::Int64                 # Number of active dimensions
     bonds::Array{Tuple}         # Array of tuples. Each tuple describes a bond between two atoms
-    xyz::Array{Float64}         # N x 3 matrix containing the x, y and z coordinates in the 1st, 2nd and 3rd column, respectively
+
+    # Simplified constructor if no bonds exist between the atoms
+    function Topology(xyz, ndim)
+        bonds = Array(Tuple,0)
+        new(xyz, bonds)
+    end
+    # Default constructor with bonds (explicitly needed because of simplified constructor above)
+    function Topology(xyz, ndim, bonds)
+        new(xyz, ndim, bonds)
+    end
 end
 
 # Generate the topology of a polyene chain of length nsites
@@ -34,8 +45,7 @@ function polyene_generator(nsites, bond_ratio, two_bond_length)
     end
 
     ## Generate Topology
-    ret = Topology(bonds, xyz)
-
+    ret = Topology(xyz, 2, bonds)
     return ret
 end
 
@@ -75,8 +85,7 @@ function graphene_generator(N,C)
     end
 
     ## Generate Topology
-    ret = Topology(bonds, xyz)
-
+    ret = Topology(xyz, 3, bonds)
     return ret
 end
 
@@ -128,7 +137,7 @@ function nanotube_generator(n,m,l)
         throw("I don't know you got here!")
     end
 
-    ret = Topology(bonds, [x y z])      # Create return Topology object
+    ret = Topology([x y z], 3, bonds)      # Create return Topology object
     return ret
 end
 
