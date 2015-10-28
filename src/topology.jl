@@ -39,39 +39,6 @@ function polyene_generator(nsites, bond_ratio, two_bond_length)
     return ret
 end
 
-# TODO: remove this function. Obsolete!
-function nanotube_geometry(n,m,l)
-    H,N,C = nanotube(n,m,l)                 # Compute tight-binding Hamiltonian
-    CC_bond = 1                             # Length of C-C bond
-    theta = 2*pi/N                          # Angle between two neighboring carbon atoms
-    radius = 1 / (2*sin(theta/2))           # Radius of the nanotube (Assuming C-C bond length is 1)
-    vertex_dist = 2                         # Distance of two opposite vertices (in a ring)
-    edge_dist = sqrt(3)                     # Distance of two opposite edges (in a ring)
-    half_length = vertex_dist*floor(l/2) + vertex_dist/2    # Half length of the entire nanotube (origin z=0)
-    xproj = CC_bond * cos(pi/3)         # Projection of carbon atom on x-axis
-    xvec = zeros(N*C,1)                     ###
-    x0_cell = [xproj,xproj+CC_bond]
-    x1_cell = [0,2*CC_bond]
-    x0 = repmat(x0_cell,convert(Int64,C/2),1)
-    x1 = repmat(x1_cell,convert(Int64,C/2),1)
-    for i = 1:C/2
-        x0[2*i-1] += (i-1)*3*CC_bond
-        x0[2*i] += (i-1)*3*CC_bond
-        x1[2*i-1] += (i-1)*3*CC_bond
-        x1[2*i] += (i-1)*3*CC_bond
-    end
-    for i = 1:N/2
-        for j = 1:C
-            xvec[2*i-1 + (j-1)*N] = x0[j]
-            xvec[2*i + (j-1)*N] = x1[j]
-        end
-    end
-    fac = (maximum(xvec)+CC_bond)/(2*pi)
-    xcirc = fac * cos(1/fac * xvec)
-    ycirc = fac * sin(1/fac * xvec)
-    return xcirc,ycirc
-end
-
 # Generate the topology of a graphene sheet of with C polyene chaines, each of length N
 function graphene_generator(N,C)
     CC_bond = 1                             # Length of C-C bond
