@@ -17,6 +17,25 @@ type Topology
     end
 end
 
+# Generate the topology of a lattice in any dimension
+function one_dim_lattice_generator(nsites, bond_length, pbc)
+    xyz = zeros(nsites,3)
+    xyz[:,1] = collect(linspace(-(nsites-1)*bond_length/2,(nsites-1)*bond_length/2,nsites))
+    bonds = Array(Tuple,0)
+    for i = 1:nsites-1
+        push!(bonds,(i,i+1))
+        push!(bonds,(i+1,i))
+    end
+    if pbc
+        push!(bonds,(1,nsites))
+        push!(bonds,(nsites,1))
+    end
+
+    # Generate Topology
+    ret = Topology(xyz, 1, bonds)
+    return ret
+end
+
 # Generate the topology of a polyene chain of length nsites
 function polyene_generator(nsites, bond_ratio, two_bond_length)
     ## Construct geometry
