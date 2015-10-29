@@ -68,6 +68,26 @@ function polyene_generator(nsites, bond_ratio, two_bond_length)
     return ret
 end
 
+# Generate a closed polyene chain
+function circled_polyene_generator(nsites, bond_length)
+    ## Construct geometry
+    xyz = zeros(nsites,3)
+    radius = 1 / (2*sin(pi/nsties))
+    xyz[:,1] = radius * cos((2*pi/nsites)*[0:(nsites-1)])
+    xyz[:,2] = radius * sin((2*pi/nsites)*[0:(nsites-1)])
+
+    ## Construct connections
+    bonds = Array(Tuple,0)
+    for i = 1:nsites                                          # Push bonds into list, no PBC in this case
+        push!(bonds,(i,i%nsites+1))
+        push!(bonds,(i%nsites+1,i))
+    end
+
+    ## Generate Topology
+    ret = Topology(xyz, 2, bonds)
+    return ret
+end
+
 # Generate the topology of a graphene sheet of with C polyene chaines, each of length N
 function graphene_generator(N,C)
     CC_bond = 1                             # Length of C-C bond
