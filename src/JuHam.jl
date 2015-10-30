@@ -5,5 +5,7 @@ module JuHam
     include("input.jl")
     include("simulation.jl")
 
-    export polyene_tps_simulation, polyene_tps_input_generator
+    export polyene_model_inpgen, polyene_real_inpgen, polyene_circle_inpgen, generate_multiple_inputs
+    export polyene_tps_simulation
+    export Input
 end

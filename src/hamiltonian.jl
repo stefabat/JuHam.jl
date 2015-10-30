@@ -34,9 +34,9 @@ function dim_tb_hamiltonian(topology::Topology, eta::Float64, pbc::Bool)
     xyz = topology.xyz
     N = size(xyz,1)
     assert(N%2==0)
-    matrix = full(SymTridiagonal(fill(0,N),repmat([1,eta],convert(Int64,N/2))))
+    matrix = full(SymTridiagonal(fill(0,N),repmat([eta,1/eta],convert(Int64,N/2))))
     if pbc
-        matrix[1,end] = matrix[end,1] = eta
+        matrix[1,end] = matrix[end,1] = 1/eta
     end
 
     ret = Hamiltonian(matrix, N, N)

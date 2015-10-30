@@ -1,6 +1,7 @@
 # Simulation function
 
 function polyene_tps_simulation(input::Input)
+    tic();
     topology = input.topology
     hamiltonian = input.hamiltonian
     parameters = input.parameters
@@ -9,7 +10,8 @@ function polyene_tps_simulation(input::Input)
 
     hamiltonian = diagonalize_hamiltonian(hamiltonian)
     tps = compute_tps(hamiltonian, topology, tps_op)
+    t=toc();
 
-    ret = Dict("topology"=>topology, "hamiltonian"=>hamiltonian, "parameters"=>parameters,"tps"=>tps)
+    ret = Dict("topology"=>topology, "hamiltonian"=>hamiltonian, "parameters"=>parameters,"tps"=>tps,"exec_time"=>t)
     return ret
 end
