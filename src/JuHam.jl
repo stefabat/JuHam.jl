@@ -9,5 +9,5 @@ module JuHam
     export polyene_model_inpgen, polyene_real_inpgen, polyene_circle_inpgen, generate_multiple_inputs
     export polyene_tps_simulation
     export Input
-    export write_out
+    export format_output
 end
