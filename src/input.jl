@@ -17,7 +17,7 @@ function polyene_model_inpgen(N::Int64, eta::Real, operator::Function, pbc::Bool
 end
 
 function polyene_real_inpgen(N::Int64, eta::Real, operator::Function, pbc::Bool)
-    topo = polyene_generator(N,1,pbc)
+    topo = polyene_generator(N,1,2,pbc)
     ham = dim_tb_hamiltonian(topo, eta, pbc)
     dic = Dict("eta"=>eta, "N"=>N, "tps_op"=>operator, "pbc"=>pbc)
 

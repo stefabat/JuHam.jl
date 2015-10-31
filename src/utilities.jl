@@ -13,7 +13,6 @@ function plot_tps(res_arr)
     for j = 1:3
         PyPlot.plot(Nval,vec(tps_val[:,j]),"-*")
     end
-    #legend(vec(etaval),"best")
     legend(etaval,loc="best")
     xlabel("N")
     ylabel("TPS")
@@ -30,7 +29,6 @@ function plot_ene(res_arr)
     end
     Nval=collect(250:500:3750)
     etaval=[1.0;1.001;1.01]
-    title("Linear chain with OBC for different lengths N")
     colors = zeros(3,8)
     for i = 1:8
         colors[:,i] = rand(3)

@@ -37,7 +37,7 @@ function one_dim_lattice_generator(nsites, bond_length, pbc)
 end
 
 # Generate the topology of a polyene chain of length nsites
-function polyene_generator(nsites, bond_ratio, two_bond_length)
+function polyene_generator(nsites, bond_ratio, two_bond_length, pbc)
     ## Construct geometry
     xyz = zeros(nsites,3)
     long_bond = bond_ratio * two_bond_length / (1 + bond_ratio)         # Find the length of the longer bond
@@ -61,6 +61,10 @@ function polyene_generator(nsites, bond_ratio, two_bond_length)
     for i = 1:nsites-1                                          # Push bonds into list, no PBC in this case
         push!(bonds,(i,i+1))
         push!(bonds,(i+1,i))
+    end
+    if pbc
+        push!(bonds,(1,nsites))
+        push!(bonds,(nsites,1))
     end
 
     ## Generate Topology
