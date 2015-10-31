@@ -39,13 +39,13 @@ function generate_multiple_inputs(generator::Function, Nval, etaval, operator, p
     if pbc
         for N in Nval
             for eta_ in etaval
-                push!(inplist,generator(N,eta_,operator,pbc))
+                push!(inplist,generator(N,eta_,x->N/(2*pi)*sin(2*pi/N*x),pbc)) # without phase because x starts from -N/2
             end
         end
     else
         for N in Nval
             for eta_ in etaval
-                push!(inplist,generator(N,eta_,x->N/(2*pi)*sin(2*pi/N*x),pbc)) # without phase because x starts from -N/2
+                push!(inplist,generator(N,eta_,operator,pbc))
             end
         end
     end
