@@ -36,9 +36,17 @@ end
 
 function generate_multiple_inputs(generator::Function, Nval, etaval, operator, pbc)
     inplist = Array(Input,0)
-    for N in Nval
-        for eta_ in etaval
-            push!(inplist,generator(N,eta_,operator,pbc))
+    if pbc
+        for N in Nval
+            for eta_ in etaval
+                push!(inplist,generator(N,eta_,operator,pbc))
+            end
+        end
+    else
+        for N in Nval
+            for eta_ in etaval
+                push!(inplist,generator(N,eta_,x-> N/(2*pi)*sin(2*pi/N*x+pi),pbc))
+            end
         end
     end
     return inplist
