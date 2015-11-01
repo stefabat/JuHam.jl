@@ -76,7 +76,7 @@ end
 function circled_polyene_generator(nsites, bond_length)
     ## Construct geometry
     xyz = zeros(nsites,3)
-    radius = 1 / (2*sin(pi/nsties))
+    radius = 1 / (2*sin(pi/nsites))
     xyz[:,1] = radius * cos((2*pi/nsites)*[0:(nsites-1)])
     xyz[:,2] = radius * sin((2*pi/nsites)*[0:(nsites-1)])
 
