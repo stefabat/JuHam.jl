@@ -189,9 +189,9 @@ function plot_topology(topology)
     x = topology.xyz[:,1]
     y = topology.xyz[:,2]
     z = topology.xyz[:,3]
-    edges = topology.bonds
+    bonds = topology.bonds
     hold(true)
-    for i in edges
+    for i in bonds
         plot3D([x[i[1]],x[i[2]]],[y[i[1]],y[i[2]]],[z[i[1]],z[i[2]]],"-*k")
     end
     axis(xmin=minimum(x)-1,xmax=maximum(x)+1,ymin=minimum(y)-1,ymax=maximum(y)+1,zmin=minimum(z)-1,zmax=maximum(z)+1)

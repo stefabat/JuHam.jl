@@ -25,7 +25,7 @@ function polyene_real_inpgen(N::Int64, eta::Real, operator::Function, pbc::Bool)
     return ret
 end
 
-function polyene_circle_inpgen(N::Int64, eta::Real, operator::Function)
+function polyene_circle_inpgen(N::Int64, eta::Real, operator::Function, pbc::Bool)
     topo = circled_polyene_generator(N,1)
     ham = dim_tb_hamiltonian(topo, eta, true)
     dic = Dict("eta"=>eta, "N"=>N, "tps_op"=>operator)
