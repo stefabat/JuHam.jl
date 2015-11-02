@@ -53,7 +53,7 @@ function polyene_generator(nsites, bond_ratio, two_bond_length, pbc)
         xyz[i,1] = x
         xyz[i,2] = y
     end
-    xyz[:,2] = flipdim(xyz[:,2],1)                                 # Flip elements such that first bond goes downward (convention)
+    xyz[:,2] = flipdim(xyz[:,2],1) - abs(maximum(xyz[:,2])-minimum(xyz[:,2]))/2                                 # Flip elements such that first bond goes downward (convention)
     xyz[:,1] = xyz[:,1] - xproj*(nsites-1)/2                    # Shift molecules, such that origin is in the middle of the chain
 
     ## Construct connections

@@ -13,9 +13,10 @@ function format_output(results_arr)
         N = parameters["N"]
         eta = parameters["eta"]
         pbc = parameters["pbc"]
+        ndim = topology.ndim
         energies = hamiltonian.eig_values
         # orbitals = hamiltonian.eig_vectors
-        geometry = topology.xyz[:,1]
+        geometry = topology.xyz[:,1:ndim]
         # tmp = Dict("N"=>N,"eta"=>eta,"pbc"=>pbc,"geometry"=>geometry,"exec_time"=>exec_time,"energies"=>energies,"orbitals"=>orbitals,"tps"=>tps)
         tmp = Dict("N"=>N,"eta"=>eta,"pbc"=>pbc,"geometry"=>geometry,"exec_time"=>exec_time,"energies"=>energies,"tps"=>tps)
         ret[i] = tmp
