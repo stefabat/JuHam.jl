@@ -1,11 +1,11 @@
 # utilities functions
 using PyPlot
 
-function plot_tps(res_arr)
+function plot_tps(res_arr,dim)
     tps_val = zeros(8,3)
     for j = 1:3
         for i = 1:8
-            tps_val[i,j] = res_arr[j+(i-1)*3]["tps"][1]
+            tps_val[i,j] = res_arr[j+(i-1)*3]["tps"][dim]
         end
     end
     Nval=collect(250:500:3750)
