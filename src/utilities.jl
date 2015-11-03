@@ -18,6 +18,23 @@ function plot_tps(res_arr,dim)
     ylabel("TPS")
 end
 
+function plot_polarizability(res_arr,dim)
+    pol_val = zeros(8,3)
+    for j = 1:3
+        for i = 1:8
+            pol_val[i,j] = res_arr[j+(i-1)*3]["polarizability"][dim]
+        end
+    end
+    Nval=collect(250:500:3750)
+    etaval=[1.0;1.001;1.01]
+    for j = 1:3
+        PyPlot.plot(Nval,vec(pol_val[:,j]),"-*")
+    end
+    legend(etaval,loc="best")
+    xlabel("N")
+    ylabel("Polarizability")
+end
+
 function plot_ene(res_arr)
     homo = zeros(8,3)
     lumo = zeros(8,3)
