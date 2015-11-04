@@ -44,7 +44,7 @@ function dim_tb_hamiltonian(topology::Topology, eta::Float64, pbc::Bool)
 end
 
 # Wrapper function to compute eigenvalues and eigenvectors of an Hamiltonian object
-function diagonalize_hamiltonian(hamiltonian::Hamiltonian)
+function diagonalize_hamiltonian!(hamiltonian::Hamiltonian)
     hamiltonian.eig_values,hamiltonian.eig_vectors = eig(hamiltonian.matrix)
-    return hamiltonian
+    #return hamiltonian
 end

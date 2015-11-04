@@ -18,17 +18,17 @@ type Topology
 end
 
 # Generate the topology of a lattice in any dimension
-function one_dim_lattice_generator(nsites, bond_length, pbc)
-    xyz = zeros(nsites,3)
-    xyz[:,1] = collect(linspace(-(nsites-1)*bond_length/2,(nsites-1)*bond_length/2,nsites))
+function one_dim_lattice_generator(N, bond_length, pbc)
+    xyz = zeros(N,3)
+    xyz[:,1] = collect(linspace(-(N-1)*bond_length/2,(N-1)*bond_length/2,N))
     bonds = Array(Tuple,0)
-    for i = 1:nsites-1
+    for i = 1:N-1
         push!(bonds,(i,i+1))
         push!(bonds,(i+1,i))
     end
     if pbc
-        push!(bonds,(1,nsites))
-        push!(bonds,(nsites,1))
+        push!(bonds,(1,N))
+        push!(bonds,(N,1))
     end
 
     # Generate Topology

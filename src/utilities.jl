@@ -1,5 +1,5 @@
 # utilities functions
-using PyPlot
+#using PyPlot
 
 function plot_tps(res_arr,dim)
     tps_val = zeros(8,3)
@@ -11,7 +11,8 @@ function plot_tps(res_arr,dim)
     Nval=collect(250:500:3750)
     etaval=[1.0;1.001;1.01]
     for j = 1:3
-        PyPlot.plot(Nval,vec(tps_val[:,j]),"-*")
+        #PyPlot.plot(Nval,vec(tps_val[:,j]),"-*")
+        plot(Nval,vec(tps_val[:,j]),"-*")
     end
     legend(etaval,loc="best")
     xlabel("N")
@@ -28,7 +29,8 @@ function plot_polarizability(res_arr,dim)
     Nval=collect(250:500:3750)
     etaval=[1.0;1.001;1.01]
     for j = 1:3
-        PyPlot.plot(Nval,vec(pol_val[:,j]),"-*")
+        #PyPlot.plot(Nval,vec(pol_val[:,j]),"-*")
+        plot(Nval,vec(pol_val[:,j]),"-*")
     end
     legend(etaval,loc="best")
     xlabel("N")

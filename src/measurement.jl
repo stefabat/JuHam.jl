@@ -10,17 +10,27 @@ function compute_tps(hamiltonian::Hamiltonian, topology::Topology, operator::Fun
     xyz = operator(topology.xyz)
     eig_vectors = hamiltonian.eig_vectors
     N = hamiltonian.nrows
-    n_electrons = convert(Int64,N/2)
+    M = convert(Int64,N/2)
     tps = zeros(1,3)
+    avg_pos = zeros(1,3)
     ndim = topology.ndim
-    for i = 1:n_electrons
-        for j = n_electrons+1:N
-            eigensquared = eig_vectors[:,i].*eig_vectors[:,j]
+    for i = 1:M
+        eig_squared = eig_vectors[:,i].^2
+        for k = 1:ndim
+            avg_pos[k] += 2.0*dot(eig_squared,xyz[:,k])
+        end
+    end
+    for i = 1:M
+        for j = M+1:N
+            eig_squared = eig_vectors[:,i].*eig_vectors[:,j]
             for k = 1:ndim
-                tps[k] += 2.0*dot(eigensquared,xyz[:,k])^2
+                tps[k] += 2.0*dot(eig_squared,xyz[:,k])^2
             end
         end
     end
+    println("<Psi|r^2|Psi> = ",tps)
+    println("<Psi|r|Psi>^2 = ",avg_pos.^2)
+    tps -= avg_pos.^2
     return tps
 end
 
