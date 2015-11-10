@@ -7,19 +7,15 @@ end
 
 # Function to compute the TPS in any dimension with an arbitrary operator
 function compute_tps(hamiltonian::Hamiltonian, topology::Topology, operator::Function)
-    xyz = operator(topology.xyz)
-    eig_vectors = hamiltonian.eig_vectors
     N = hamiltonian.nrows
     M = convert(Int64,N/2)
-    tps = zeros(1,3)
-    avg_pos = zeros(1,3)
     ndim = topology.ndim
-    for i = 1:M
-        eig_squared = eig_vectors[:,i].^2
-        for k = 1:ndim
-            avg_pos[k] += 2.0*dot(eig_squared,xyz[:,k])
-        end
+    xyz = zeros(N,3)
+    for i = 1:ndim
+        xyz[:,i] = operator(topology.xyz[:,i])
     end
+	eig_vectors = hamiltonian.eig_vectors
+    tps = zeros(1,3)
     for i = 1:M
         for j = M+1:N
             eig_squared = eig_vectors[:,i].*eig_vectors[:,j]
@@ -28,9 +24,6 @@ function compute_tps(hamiltonian::Hamiltonian, topology::Topology, operator::Fun
             end
         end
     end
-    println("<Psi|r^2|Psi> = ",tps)
-    println("<Psi|r|Psi>^2 = ",avg_pos.^2)
-    tps -= avg_pos.^2
     return tps
 end
 
