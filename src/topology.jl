@@ -1,5 +1,7 @@
 ## Topology objects
 
+using PyPlot
+
 # Base composite type describing a topology
 type Topology
     xyz::Array{Float64}         # N x ndim matrix containing the x, y and z coordinates in the 1st, 2nd and 3rd column, respectively
@@ -153,10 +155,19 @@ function nanotube_generator(n,m,l)
     if n == m               # Armchair nanotube
         z = graphene.xyz[:,1]           # Note that the x-axis of graphene becomes the z-axis
         xgr = graphene.xyz[:,3]         # And viceversa
-        CC_bond = xgr[N+1]-xgr[1]
+        CC_bond = abs(xgr[N+1]-xgr[1])
+		#= xproj_CC_bond = abs(xgr[2] - xgr[1]) =#
         fac = (maximum(xgr)+CC_bond)/(2*pi)         # Compute factor for nanotube radius
-        x = fac * cos(1/fac * xgr)                  # Roll x- and y-axis of graphene sheet
-        y = fac * sin(1/fac * xgr)
+		alpha = CC_bond/fac
+		radius = (CC_bond/2)/(sin(alpha/2))
+        println("CC_bond ",CC_bond)
+        println("fac ",fac)
+        println("alpha ",alpha)
+        println("radius ",radius)
+        x = radius * cos(1/fac * xgr)                  # Roll x- and y-axis of graphene sheet
+        y = radius * sin(1/fac * xgr)
+		zshift = abs(maximum(z)-minimum(z))/2
+		z = z - zshift
         for i = 1:N                     # Add new bonds connecting the edgese to the list
             if i%2 == 0
                 push!(bonds,(i,i+(C-1)*N))
@@ -164,20 +175,24 @@ function nanotube_generator(n,m,l)
             end
         end
         xyz = [x y z]
-    elseif m == 0
+    elseif m == 0			# Zig zag nanotube
         xgr = graphene.xyz[:,1]
         z = graphene.xyz[:,3]
-        CC_bond = z[N+1]-z[1]
-        fac = (maximum(xgr)+CC_bond)/(2*pi)
-        x = fac * cos(1/fac * xgr)
-        y = fac * sin(1/fac * xgr)
+        CC_bond = abs(z[N+1]-z[1])
+		xproj_CC_bond = abs(xgr[2] - xgr[1])
+		radius = (xproj_CC_bond/2)/(sin(pi/N))
+        fac = (maximum(xgr)+ xproj_CC_bond)/(2*pi)
+        x = radius * cos(1/fac * xgr)
+        y = radius * sin(1/fac * xgr)
+		zshift = abs(maximum(z)-minimum(z))/2
+		z = z - zshift
         for j = 1:C
                 push!(bonds,(1+(j-1)*N,j*N))
                 push!(bonds,(j*N,1+(j-1)*N))
         end
         xyz = [x y z]
     else
-        throw("I don't know you got here!")
+        throw("I don't know how you got here!")
     end
 
     ret = Topology([x y z], 3, bonds)      # Create return Topology object
@@ -190,10 +205,10 @@ function plot_topology(topology)
     y = topology.xyz[:,2]
     z = topology.xyz[:,3]
     bonds = topology.bonds
-    hold(true)
+    PyPlot.hold(true)
     for i in bonds
         plot3D([x[i[1]],x[i[2]]],[y[i[1]],y[i[2]]],[z[i[1]],z[i[2]]],"-*k")
     end
-    axis(xmin=minimum(x)-1,xmax=maximum(x)+1,ymin=minimum(y)-1,ymax=maximum(y)+1,zmin=minimum(z)-1,zmax=maximum(z)+1)
-    hold(false)
+    axis(xmin=minimum(x)-1,xmax=maximum(x)+1,ymin=minimum(y)-1,ymax=maximum(y)+1,zmin=minimum(z)-1,zmax=maximum(z)+1,aspect="equal")
+    PyPlot.hold(false)
 end
