@@ -27,6 +27,29 @@ function compute_tps(hamiltonian::Hamiltonian, topology::Topology, operator::Fun
     return tps
 end
 
+# Function to compute the average position <Psi|X|Psi> of a state |Psi>
+function compute_avgpos(hamiltonian::Hamiltonian, topology::Topology, operator::Function)
+	N = hamiltonian.nrows
+	M = convet(Int64,N/2)
+	ndim = topology.ndim
+	xyz = zeros(N,3)
+	for i = 1:ndim
+		xyz[:,i] = operator(topology.xyz[:,i])
+	end
+	eig_vectors = hamiltonian.eig_vectors
+	avgpos = zeros(1,3)
+	for i = 1:M
+		for j = 1:N
+			eig_sqaured = eig_vectors[:,i].*eig_vectors[:,i]
+			for k = 1:ndim
+				avgpos[k] += dot(eig_squared,xyz[:,k])
+			end
+		end
+	end
+	return avgpos
+end
+
+
 # Function to compute the polarizability in any dimension with an arbitrary operator
 # Note: for the moment restricted to parallel directions of the cartesian components
 # TODO: compute also xy, xz and yz polarizabilities
