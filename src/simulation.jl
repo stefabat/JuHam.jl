@@ -10,6 +10,9 @@ function simulation(input::Input)
 
     diagonalize_hamiltonian!(hamiltonian)
     tps = compute_tps(hamiltonian, topology, tps_op)
+	println("<Psi|X^2|Psi>: ",tps[1])
+	avgpos = compute_avgpos(hamiltonian, topology, tps_op)
+	println("<Psi|X|Psi>: ",avgpos[1])
     !polarizability = compute_polarizability(hamiltonian, topology, tps_op)
     t=toc();
 

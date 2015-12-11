@@ -1,11 +1,13 @@
-# Define parametric composite type for Hamiltonians
-# T defines the type of the matrix elements
-type Hamiltonian
-    matrix::Array{Float64,2}          # Hamiltonian matrix always of dimension 2
-    nrows::Int64                # Int64 according to output of size() function
-    ncols::Int64                # Uint64 would probably be better? Redundant, Hamiltonian always sqaure
-    eig_values::Array{Float64}     # Eigenvalues of the Hamiltonian
-    eig_vectors::Array{Float64}       # Eigenvectors of the Hamiltonian
+# Parent type of all Hamiltonians
+abstract type Hamiltonian
+
+# Tight-Binding Hamiltonian
+type TBHamiltonian <: Hamiltonian
+    matrix::Array{Float64,2}          # Hamiltonian matrix 
+	pbc::Bool
+
+
+
 
     function Hamiltonian(matrix::Array{Float64,2}, nrows::Int64, ncols::Int64)
         eig_values = Array(Float64,0)

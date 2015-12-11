@@ -19,29 +19,32 @@ function polyene_model_inpgen(N::Int64, eta::Real, operator::Function, pbc::Bool
 end
 
 function polyene_real_inpgen(N::Int64, eta::Real, operator::Function, pbc::Bool)
-    topo = polyene_generator(N,1,2,pbc)
-    ham = dim_tb_hamiltonian(topo, eta, pbc)
-    dic = Dict("eta"=>eta, "N"=>N, "tps_op"=>operator, "pbc"=>pbc)
+    top = polyene_generator(N,1,2,pbc)
+    ham = dim_tb_hamiltonian(top, eta, pbc)
+    dic = Dict("eta"=>eta, "N"=>N, "pbc"=>pbc)
+	op  = operator
 
-    ret = Input(topo,ham,dic)
+    ret = Input(top,ham,dic,op)
     return ret
 end
 
 function polyene_circle_inpgen(N::Int64, eta::Real, operator::Function, pbc::Bool)
-    topo = circled_polyene_generator(N,1)
-    ham = dim_tb_hamiltonian(topo, eta, true)
-    dic = Dict("eta"=>eta, "N"=>N, "tps_op"=>operator, "pbc"=>true)
+    top = circled_polyene_generator(N,1)
+    ham = dim_tb_hamiltonian(top, eta, true)
+    dic = Dict("eta"=>eta, "N"=>N, "pbc"=>true)
+	op  = operator
 
-    ret = Input(topo,ham,dic)
+    ret = Input(top,ham,dic,op)
     return ret
 end
 
 function nanotube_inpgen(n::Int64, m::Int64, l::Int64, operator::Function, pbc::Bool)
-	topo = nanotube_generator(n,m,l)
-	ham = tb_hamiltonian(topo)
-	dic = Dict("n"=>n, "m"=>m, "l"=>l, "tps_op"=>operator, "pbc"=>pbc)
+	top = nanotube_generator(n,m,l)
+	ham = tb_hamiltonian(top)
+	dic = Dict("n"=>n, "m"=>m, "l"=>l, "pbc"=>pbc)
+	op  = operator
 
-	ret = Input(topo,ham,dic)
+	ret = Input(top,ham,dic,op)
 	return ret
 end
 
