@@ -1,10 +1,10 @@
 # Simple scripting page
 
-for n = 250:500:1750
-	for shift = 0:1.1:10
-		tic();
+using JuHam
+
+for N = 250:500:1750
 		println("###########################################")
-		println("N: ",n,"\tshift: ",shift)
+		println("N: ", n)
 		input = polyene_model_inpgen(n,1.1,x->n/(2*pi)*sin(2*pi/n*(x+shift)),true)
 		#= input = polyene_model_inpgen(n,1.0,x->x+shift,true) =#
 		topology = input.topology
@@ -22,8 +22,5 @@ for n = 250:500:1750
 		println("|Psi>^2:\t",avgpos[1]^2)
 		t=toc();
 		println("###########################################\n")
-	end
 end
-
-#ret = Dict("topology"=>topology, "energies"=>hamiltonian.eig_values, "parameters"=>parameters,"tps"=>tps,"exec_time"=>t)
 
