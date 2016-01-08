@@ -1,8 +1,8 @@
-# Define parent type of all models
+# Parent type of all models
 abstract Model
 
-type TBModel <: Model
-	bc::AbstractString
-    tij::Function
+type HuckelModel <: Model
+    alpha::Float64      # Coulomb integral
+    beta ::Float64      # Resonance/bond integral
 end
 

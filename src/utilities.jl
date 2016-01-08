@@ -1,5 +1,6 @@
 # utilities functions
-#using PyPlot
+
+using PyPlot
 
 function plot_tps(res_arr,dim)
     tps_val = zeros(8,3)
@@ -60,3 +61,30 @@ function plot_ene(res_arr)
     xlabel("eta")
     ylabel("E")
 end
+
+# Simple helper function to visualize any topology
+function plot_nanotube(topology)
+    x     = topology.coords[:,1]
+    y     = topology.coords[:,2]
+    z     = topology.coords[:,3]
+    bonds = topology.bonds
+    PyPlot.hold(true)
+    for i in bonds
+        plot3D([x[i[1]],x[i[2]]],[y[i[1]],y[i[2]]],[z[i[1]],z[i[2]]],"-*k")
+    end
+    axis(xmin=minimum(x)-1,xmax=maximum(x)+1,ymin=minimum(y)-1,ymax=maximum(y)+1,zmin=minimum(z)-1,zmax=maximum(z)+1,aspect="equal")
+    PyPlot.hold(false)
+end
+
+function plot_graphene(topology)
+    x     = topology.coords[:,1]
+    y     = topology.coords[:,2]
+    PyPlot.hold(true)
+    for i in topology.bonds
+        plot([x[i[1]],x[i[2]]],[y[i[1]],y[i[2]]],"-*k")
+    end
+    axis(xmin=minimum(x)-1,xmax=maximum(x)+1,ymin=minimum(y)-1,ymax=maximum(y)+1,aspect="equal")
+    PyPlot.hold(false)
+end
+
+

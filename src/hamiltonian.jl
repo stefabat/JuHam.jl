@@ -1,21 +1,30 @@
-# Parent type of all Hamiltonians
-abstract type Hamiltonian
-
-# Tight-Binding Hamiltonian
-type TBHamiltonian <: Hamiltonian
-    matrix::Array{Float64,2}          # Hamiltonian matrix 
-	pbc::Bool
-
-
-
-
-    function Hamiltonian(matrix::Array{Float64,2}, nrows::Int64, ncols::Int64)
-        eig_values = Array(Float64,0)
-        eig_vectors = Array(Float64,0)
-        new(matrix, nrows, ncols, eig_values, eig_vectors)
-    end
+# Hamiltonian composite type
+type Hamiltonian
+    model   ::Model
+    topology::Topology
+    basis   ::Basis
+    matrix  ::Array{Float64,2}
 end
 
+# Generate Huckel Hamiltonian
+function generate_hamiltonian(model::HuckelModel, topology::Topology)
+    N      = size(topology.coords,1)            # Number of sites
+    matrix = diagm(repmat([model.alpha],N))     # Coulumb integral on the diagonal
+    for bond in topology.bonds
+        matrix[bond[1],bond[2]] = model.beta    # Bond integrals according to topoogy
+    end
+
+    return Hamiltonian(model, topology, Basis(N), matrix)
+end
+
+# Wrapper function to compute the orbital energies and the wavefunction
+function diagonalize_hamiltonian(hamiltonian::Hamiltonian)
+    MOcoeffs,MOenergiesc = eig(hamiltonian.matrix)
+
+    return WaveFunction(hamiltonian.basis, MOcoeffs),MOenergies
+end
+
+#=
 # Generate the tight-binding Hamiltonian for a given topology
 function tb_hamiltonian(topology::Topology)
     xyz = topology.xyz
@@ -44,9 +53,5 @@ function dim_tb_hamiltonian(topology::Topology, eta::Float64, pbc::Bool)
     ret = Hamiltonian(matrix, N, N)
     return ret
 end
+=#
 
-# Wrapper function to compute eigenvalues and eigenvectors of an Hamiltonian object
-function diagonalize_hamiltonian!(hamiltonian::Hamiltonian)
-    hamiltonian.eig_values,hamiltonian.eig_vectors = eig(hamiltonian.matrix)
-    #return hamiltonian
-end
