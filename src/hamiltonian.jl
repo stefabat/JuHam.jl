@@ -1,17 +1,25 @@
-# Hamiltonian composite type
+# Hamiltonian matrix composite type
+# The Hamiltonian matrix for a given model,
+# expressed in the basis {\Phi_i}.
+# Hij = <\Phi_i| H_eff |\Phi_j>
 type Hamiltonian
-    model   ::Model
-    topology::Topology
-    basis   ::Basis
-    matrix  ::Array{Float64,2}
+    model::Model                # The model used to construct the Hamiltonian matrix
+    topology::Topology          # The topology of the system studied
+    basis::Basis                # The basis in which the Hamiltonian is expressed
+    matrix::Array{Float64,2}    # The actual matrix holding the data
+    bc::AbstractString          # Boundary conditions
 end
 
+# For each model, we have a specialized constructor, which knows the parameters
+# of the model chosen.
+# Same function name, different signatures: Multiple Dispatch
+
 # Generate Huckel Hamiltonian
-function generate_hamiltonian(model::HuckelModel, topology::Topology)
-    N      = size(topology.coords,1)            # Number of sites
-    matrix = diagm(repmat([model.alpha],N))     # Coulumb integral on the diagonal
+function generate_hamiltonian(model::HuckelModel, topology::Topology, basis::Basis)
+    L = basis.dim                               # Basis dimension
+    matrix = diagm(repmat([model.alpha],N))     # Coulumb integrals on the diagonal
     for bond in topology.bonds
-        matrix[bond[1],bond[2]] = model.beta    # Bond integrals according to topoogy
+        matrix[bond[1],bond[2]] = model.beta    # Bond integrals according to topology
     end
 
     return Hamiltonian(model, topology, Basis(N), matrix)
@@ -54,4 +62,3 @@ function dim_tb_hamiltonian(topology::Topology, eta::Float64, pbc::Bool)
     return ret
 end
 =#
-
