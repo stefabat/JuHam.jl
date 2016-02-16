@@ -7,22 +7,24 @@ type Hamiltonian
     topology::Topology          # The topology of the system studied
     basis::Basis                # The basis in which the Hamiltonian is expressed
     matrix::Array{Float64,2}    # The actual matrix holding the data
-    bc::AbstractString          # Boundary conditions
 end
 
 # For each model, we have a specialized constructor, which knows the parameters
 # of the model chosen.
 # Same function name, different signatures: Multiple Dispatch
 
-# Generate Huckel Hamiltonian
+# Generate simple Hueckel Hamiltonian
 function generate_hamiltonian(model::HuckelModel, topology::Topology, basis::Basis)
     L = basis.dim                               # Basis dimension
-    matrix = diagm(repmat([model.alpha],N))     # Coulumb integrals on the diagonal
-    for bond in topology.bonds
-        matrix[bond[1],bond[2]] = model.beta    # Bond integrals according to topology
+    matrix = diagm(repmat([model.alpha],L))     # Coulumb integrals on the diagonal
+    # Loop over all pairs according to max_dist of interaction
+    for d = 1:model.max_dist
+        # NOTE: findin() returns an array of linearized indices, but this is
+        #       correctly interpreted by the matrix
+        matrix[findin(topology.dist_mat,d)] = model.beta    # Bond integrals according to topology
     end
 
-    return Hamiltonian(model, topology, Basis(N), matrix)
+    return Hamiltonian(model, topology, basis, matrix)
 end
 
 # Wrapper function to compute the orbital energies and the wavefunction

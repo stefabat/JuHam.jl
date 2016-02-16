@@ -7,6 +7,7 @@ abstract Model
 type HuckelModel <: Model
     alpha::Float64      # Coulomb integral
     beta ::Float64      # Resonance/bond integral
+    max_dist::Integer   # Max distance of interaction
 end
 
 # The tight-binding model

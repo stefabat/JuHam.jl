@@ -6,13 +6,18 @@ type Topology
     coords  ::Array{Float64}      # N x ndim matrix containing the coordinates of the system
     bonds   ::Set{Tuple}          # Set of tuples. Each tuple describes a bond between two atoms
     dist_mat::Array{Int64,2}      # Distance matrix. Each entry is the distance between two sites
+    # NOTE: even though I believe the boundary conditions should be a property of the Hamiltonian object,
+    #       it's much easier to have them here, such that the distance matrix can be populated accordingly.
+    #       Morevoer, in this way I avoid to have an if statement in every hamiltonian constructor that
+    #       checks which topology I have and add the bc accordingly. In summary, this is more extensible.
+    bc      ::AbstractString      # Boundary conditions
 end
 
 # Generate the topology of a one dimensional lattice
 # NOTE: the origin is at the centre of the lattice
-function one_dim_lattice_generator(L::Integer, lat_const::Real = 1.0)
+function lattice_generator(L::Integer, lat_const::Real = 1.0, bc::ASCIIString = "obc")
     coords = collect(linspace(-(L-1)*lat_const/2,(L-1)*lat_const/2,L))  # Generate coordinates of the lattice
-    bonds = Set{Tuple}()                # Initialize bonds WARNING: deprecated, soon to be erased
+    bonds = Set{Tuple}()                # Initialize bonds NOTE: deprecated, soon to be erased
     dist_mat = ones(L,L)*(2*L)          # Initialize distance matrix: all entries are 2*L
 
     # Setting nearest neighbors
@@ -25,10 +30,16 @@ function one_dim_lattice_generator(L::Integer, lat_const::Real = 1.0)
     end
     dist_mat[L,L] = 0
 
+    # Check boundary conditions
+    if bc == "pbc"
+        dist_mat[1,L] = 1
+        dist_mat[L,1] = 1
+    end
+
     # Compute all the distances between the sites
     populate_dist_mat!(dist_mat)
 
-    return Topology(1, coords, bonds, dist_mat)
+    return Topology(1, coords, bonds, dist_mat, bc)
 end
 
 # Generate the topology of a regular polygon
@@ -54,10 +65,10 @@ function polygon_generator(L::Integer, bond_length::Real = 1.0)
     dist_mat[L,L] = 0
     dist_mat[1,L] = 1; dist_mat[L,1] = 1
 
-    # Compute all the distances between the sites
+    # Populate all the distances between the sites
     populate_dist_mat!(dist_mat)
 
-    return Topology(2, coords, bonds, dist_mat)
+    return Topology(2, coords, bonds, dist_mat, "obc")
 end
 
 # Generate the topology of a graphene ribbon
@@ -66,13 +77,15 @@ end
 #       each other. This might not be the best solution
 # Stacking polyene chains (\/\/\/\/\/\) on top of each other
 # NOTE: the ribbon is NOT centered at the xy origin
-function graphene_generator(L::Integer, C::Integer, CC_bond::Float64 = 1.0)
+function graphene_generator(L::Integer, C::Integer, CC_bond::Float64 = 1.0, bc::ASCIIString = "obc")
     if L < 4
         throw(ArgumentError("L has to be at least 4"))
     elseif C < 2
         throw(ArgumentError("C has to be at least 2"))
     elseif L%2 == 1
         throw(ArgumentError("L has to be even"))
+    elseif bc != "obc"
+        throw(ArgumentError("Currently only obc are supported"))
     end
 
     xproj  = CC_bond * cos(pi/6)            # Projection of carbon atom on x-axis
@@ -124,14 +137,16 @@ function graphene_generator(L::Integer, C::Integer, CC_bond::Float64 = 1.0)
     # Compute all the distances between atoms
     populate_dist_mat!(dist_mat)
 
-    return Topology(2, coords, bonds, dist_mat)
+    return Topology(2, coords, bonds, dist_mat, bc)
 end
 
 # Generate the topology of an (n,m) carbon nanotube of length l
 # NOTE: The nanotube is centered along the z-axis
-function nanotube_generator(n::Integer, m::Integer , l::Integer, CC_bond::Float64 = 1.0)
+function nanotube_generator(n::Integer, m::Integer , l::Integer, CC_bond::Float64 = 1.0, bc::ASCIIString = "obc")
     if n < m || n+m < 6
         throw(ArgumentError("n + m must be at least 6, with n >= m"))
+    elseif bc != "obc"
+        throw(ArgumentError("Currently only obc are supported"))
     end
 
     if n == m
@@ -207,20 +222,27 @@ function nanotube_generator(n::Integer, m::Integer , l::Integer, CC_bond::Float6
         throw(ErrorException("I don't know how you got here!"))
     end
 
-    return Topology(3, coords, bonds, dist_mat)
+    return Topology(3, coords, bonds, dist_mat, bc)
 end
 
 # Populate the distance matrix
 # Input: a matrix with zeros on the diagonal and ones on connected
 # sites. All the other entries are much larger.
 # Ouput: the populated matrix with the distance between each site
-# NOTE: very naive algorithm, O(N^2 + logN)
+# NOTE: naive algorithm, O(N^3 + logN)
 function populate_dist_mat!(D)
     L = size(D,1)
-    for i = 1:L
-        for j = i+1:L
-            D[i,j] = D[j,i] = min(D[i,j],minimum(D[i,:]'+D[:,j]))
+    Dold = deepcopy(D)
+    for iter = 1:L
+        for i = 1:L
+            for j = i+1:L
+                D[i,j] = D[j,i] = min(D[i,j],minimum(D[i,:]'+D[:,j]))
+            end
         end
+        if norm(Dold-D) == 0
+            return
+        end
+        Dold = deepcopy(D)
     end
 end
 
