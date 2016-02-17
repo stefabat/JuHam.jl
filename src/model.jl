@@ -14,4 +14,5 @@ end
 # The tij parameter is a function of the site indeces i and j
 type TightBinding <: Model
     tij::Function       # Hopping integrals
+    max_dist::Integer   # Max distance of interaction
 end

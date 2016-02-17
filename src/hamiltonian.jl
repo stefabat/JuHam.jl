@@ -14,7 +14,7 @@ end
 # Same function name, different signatures: Multiple Dispatch
 
 # Generate simple Hueckel Hamiltonian
-function generate_hamiltonian(model::HuckelModel, topology::Topology, basis::Basis)
+function simple_huckel(model::HuckelModel, topology::Topology, basis::Basis)
     L = basis.dim                               # Basis dimension
     matrix = diagm(repmat([model.alpha],L))     # Coulumb integrals on the diagonal
     # Loop over all pairs according to max_dist of interaction
@@ -25,6 +25,12 @@ function generate_hamiltonian(model::HuckelModel, topology::Topology, basis::Bas
     end
 
     return Hamiltonian(model, topology, basis, matrix)
+end
+
+# Generate dimerized Hueckel Hamiltonian
+function tight_binding(model::TightBinding, topology::Topology, basis::Basis)
+    L = basis.dim                   # Basis dimension
+    matrix = zeros(L, L)            # Initialize data matrix
 end
 
 # Wrapper function to compute the orbital energies and the wavefunction
