@@ -19,15 +19,33 @@ function simple_huckel(model::HuckelModel, topology::Topology, basis::Basis)
     matrix = diagm(repmat([model.alpha],L))     # Coulumb integrals on the diagonal
     # Loop over all pairs according to max_dist of interaction
     for d = 1:model.max_dist
-        # NOTE: findin() returns an array of linearized indices, but this is
-        #       correctly interpreted by the matrix
+        # NOTE: findin() returns an array of linearized indices, but this is correctly interpreted by the matrix
         matrix[findin(topology.dist_mat,d)] = model.beta    # Bond integrals according to topology
     end
 
     return Hamiltonian(model, topology, basis, matrix)
 end
 
-# Generate dimerized Hueckel Hamiltonian
+# Generate dimerized Hueckel Hamiltonian for a linear polyene chain
+# NOTE: this is a very specific generation of the Hamiltonian and should be used carefully
+function dimerized_huckel(model::DimHuckelModel, topology::Topology, basis::Basis)
+    L = size(topology.coords, 1)            # Lattice length
+    # TODO: change it to throw exception
+    assert(L%2==0)                          # Check that there are an even number of sites
+
+    # Coulumb integrals on the diagonal and eta, 1/eta on the lower and upper diagonals
+    matrix = SymTridiagonal(fill(model.alpha,L), repmat([model.eta,1/model.eta], convert(Int64,L/2)))
+
+    # If pbc, transform the matrix into a dense one and add the connceting values
+    if topology.bc == "pbc"
+        matrix = full(matrix)
+        matrix[1,end] = matrix[end,1] = 1/eta
+    end
+
+    return Hamiltonian(model, topology, basis, matrix)
+end
+
+# Generate tight-binding Hamiltonian
 function tight_binding(model::TightBinding, topology::Topology, basis::Basis)
     L = basis.dim                   # Basis dimension
     matrix = zeros(L, L)            # Initialize data matrix
@@ -40,33 +58,3 @@ function diagonalize_hamiltonian(hamiltonian::Hamiltonian)
     return WaveFunction(hamiltonian.basis, MOcoeffs),MOenergies
 end
 
-#=
-# Generate the tight-binding Hamiltonian for a given topology
-function tb_hamiltonian(topology::Topology)
-    xyz = topology.xyz
-    bonds = topology.bonds
-    N = size(xyz,1)
-    matrix = zeros(N,N)
-    for bond in bonds
-        matrix[bond[1],bond[2]] = 1
-    end
-
-    ret = Hamiltonian(matrix, N, N)
-    return ret
-end
-
-# Generate a tight-binding Hamiltonian for two different bond interactions
-# NOTE: ad-hoc solution, not general
-function dim_tb_hamiltonian(topology::Topology, eta::Float64, pbc::Bool)
-    xyz = topology.xyz
-    N = size(xyz,1)
-    assert(N%2==0)
-    matrix = full(SymTridiagonal(fill(0,N),repmat([eta,1/eta],convert(Int64,N/2))))
-    if pbc
-        matrix[1,end] = matrix[end,1] = 1/eta
-    end
-
-    ret = Hamiltonian(matrix, N, N)
-    return ret
-end
-=#
