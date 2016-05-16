@@ -14,13 +14,16 @@ end
 # Same function name, different signatures: Multiple Dispatch
 
 # Generate simple Hueckel Hamiltonian
-function simple_huckel(model::HuckelModel, topology::Topology, basis::Basis)
-    L = basis.dim                               # Basis dimension
-    matrix = diagm(repmat([model.alpha],L))     # Coulumb integrals on the diagonal
-    # Loop over all pairs according to max_dist of interaction
-    for d = 1:model.max_dist
-        # NOTE: findin() returns an array of linearized indices, but this is correctly interpreted by the matrix
-        matrix[findin(topology.dist_mat,d)] = model.beta    # Bond integrals according to topology
+function generate_hamiltonian(model::HuckelModel, topology::Topology, basis::Basis)
+    L = basis.dim                           # Basis dimension
+
+    # Coulumb integrals on the diagonal, bond integrals on the off diagonals
+    matrix = SymTridiagonal(fill(model.alpha,L), fill(model.beta,L-1))
+
+    # If pbc, transform the matrix into a dense one and add the connceting values
+    if topology.bc == "pbc"
+        matrix = full(matrix)
+        matrix[1,end] = matrix[end,1] = model.beta
     end
 
     return Hamiltonian(model, topology, basis, matrix)
@@ -28,8 +31,8 @@ end
 
 # Generate dimerized Hueckel Hamiltonian for a linear polyene chain
 # NOTE: this is a very specific generation of the Hamiltonian and should be used carefully
-function dimerized_huckel(model::DimHuckelModel, topology::Topology, basis::Basis)
-    L = size(topology.coords, 1)            # Lattice length
+function generate_hamiltonian(model::DimHuckelModel, topology::Topology, basis::Basis)
+    L = basis.dim                           # Basis dimension
     # TODO: change it to throw exception
     assert(L%2==0)                          # Check that there are an even number of sites
 
@@ -46,15 +49,16 @@ function dimerized_huckel(model::DimHuckelModel, topology::Topology, basis::Basi
 end
 
 # Generate tight-binding Hamiltonian
-function tight_binding(model::TightBinding, topology::Topology, basis::Basis)
-    L = basis.dim                   # Basis dimension
-    matrix = zeros(L, L)            # Initialize data matrix
+function generate_hamiltonian(model::TightBinding, topology::Topology, basis::Basis)
+    throw(ErrorException("The tight-binding Hamiltonian is not yet implemented"))
+    # L = basis.dim                   # Basis dimension
+    # matrix = zeros(L, L)            # Initialize data matrix
 end
 
 # Wrapper function to compute the orbital energies and the wavefunction
 function diagonalize_hamiltonian(hamiltonian::Hamiltonian)
+    # Exact diagonalization
     MOcoeffs,MOenergiesc = eig(hamiltonian.matrix)
 
     return WaveFunction(hamiltonian.basis, MOcoeffs),MOenergies
 end
-

@@ -7,7 +7,6 @@ abstract Model
 type HuckelModel <: Model
     alpha::Float64      # Coulomb integral
     beta ::Float64      # Resonance/bond integral
-    max_dist::Integer   # Max distance of interaction
 end
 
 # The dimerized simple Hueckel model
@@ -15,7 +14,6 @@ end
 type DimHuckelModel <: Model
     alpha::Float64      # Coulomb integral
     eta  ::Float64      # beta1/beta2 ratio
-    max_dist::Integer   # Max distance of interaction
 end
 
 # The tight-binding model
