@@ -24,13 +24,13 @@ end
 
 
 """
-    lattice_generator(L, lat_const = 1.0, bc = "obc")
+    lattice_generator(L, lat_const = 1.0, bc)
 
 Generate the topology of a one-dimensional lattice of `L` sites.
 """
-function lattice_generator(L::Integer, lat_const::Real = 1.0, bc::String = "obc")
+function lattice_generator(L::Integer, lat_const::Real = 1.0, bc = "obc")
     if bc != "obc" || bc != "pbc"   # Checking that boundary conditions are valid
-        throw(DomainError("Possible values are "obc" or "pbc"."))
+        throw(DomainError("Possible values are 'obc' or 'pbc'."))
     end
     coords = collect(linspace(-(L-1)*lat_const/2,(L-1)*lat_const/2,L))  # Generate coordinates of the lattice
     bonds = Set{Tuple}()                # Initialize bonds NOTE: deprecated
@@ -63,7 +63,6 @@ end
     polygon_generator(L, bond_length = 1.0)
 
 Generate the topology of a regular polygon of `L` vertex.
-
 """
 function polygon_generator(L::Integer, bond_length::Real = 1.0)
     if L < 3
