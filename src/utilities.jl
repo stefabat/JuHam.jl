@@ -1,6 +1,6 @@
 # utilities functions
 
-using PyPlot
+#using PyPlot
 
 function plot_tps(res_arr,dim)
     tps_val = zeros(8,3)

@@ -1,8 +1,8 @@
 module JuHam
     include("topology.jl")
     include("model.jl")
-    include("wavefunction.jl")
     include("basis.jl")
+    include("wavefunction.jl")
     include("hamiltonian.jl")
     include("measurement.jl")
 
