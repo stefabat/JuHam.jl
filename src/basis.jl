@@ -1,3 +1,10 @@
-type Basis
-    dim::Integer            # Dimension of the basis
+
+"""
+    AbstractBasis
+
+Abstract supertype for all basis sets.
+"""
+abstract type AbstractBasis end
+
+struct Basis <: AbstractBasis
 end

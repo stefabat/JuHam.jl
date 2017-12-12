@@ -1,5 +1,6 @@
 # Simple scripting page
 
+include("src/JuHam.jl")
 using JuHam
 
 for N = 250:500:1750

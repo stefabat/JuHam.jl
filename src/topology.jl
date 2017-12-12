@@ -1,62 +1,26 @@
 ## Topology objects
 
-"""
-    Topology(dim, L, coords, bonds, dist_mat, bc)
+abstract type Topology end
 
-Composite type describing the geometry and the connections of lattices and arbitrary three-dimensional structures.
+"""
+    Topology(dim, L, coords, dist_mat, bc)
+
+Composite struct describing the geometry and the connections of lattices and arbitrary three-dimensional structures.
 
 # Arguments
-* `dim::Integer`: Number of active dimensions
-* `  L::Integer`: Number of sites/atoms
+* `dim::Int64`: Number of active dimensions
+* `  L::Int64`: Number of sites/atoms
 * `coords::Array{Float64}`: N x dim matrix containing the coordinates of the system
-* `bonds::Set{Tuple}`: Set of index pairs indicating directly connected sites/atoms
 * `dist_mat::Array{Int64}`: Matrix containing the shortest path length connecting two sites/atoms
-* `bc::AbstractString`: String indicating the boundary conditions
+* `bc::String`: String indicating the boundary conditions
 """
-type Topology
-    dim     ::Integer
-    L       ::Integer
-    coords  ::Array{Float64}
-    bonds   ::Set{Tuple}        # NOTE: deprecated
-    dist_mat::Array{Int64,2}
-    bc      ::AbstractString    # NOTE: Should be a Hamiltonian property but it's easier to have them here
-end
-
-
-"""
-    lattice_generator(L, lat_const = 1.0, bc)
-
-Generate the topology of a one-dimensional lattice of `L` sites.
-"""
-function lattice_generator(L::Integer, lat_const::Real = 1.0, bc = "obc")
-    if bc != "obc" || bc != "pbc"   # Checking that boundary conditions are valid
-        throw(DomainError("Possible values are 'obc' or 'pbc'."))
-    end
-    coords = collect(linspace(-(L-1)*lat_const/2,(L-1)*lat_const/2,L))  # Generate coordinates of the lattice
-    bonds = Set{Tuple}()                # Initialize bonds NOTE: deprecated
-    dist_mat = ones(L,L)*(2*L)          # Initialize distance matrix: all entries are 2*L
-
-    # Setting nearest neighbors
-    for i = 1:L-1
-        push!(bonds,(i,i+1))
-        push!(bonds,(i+1,i))
-        dist_mat[i,i+1] = 1
-        dist_mat[i+1,i] = 1
-        dist_mat[i,i]   = 0
-    end
-    dist_mat[L,L] = 0
-
-    # Add connections if periodic boundary conditions 
-    if bc == "pbc"
-        dist_mat[1,L] = 1
-        dist_mat[L,1] = 1
-    end
-
-    # Compute all the distances between the sites
-    populate_dist_mat!(dist_mat)
-
-    return Topology(1, L, coords, bonds, dist_mat, bc)
-end
+# struct Topology
+    # dim   ::Int64
+    # L     ::Int64
+    # coords::Array{Float64}
+    # dist  ::Array{Int64,2}
+    # bc    ::String    # NOTE: Should be a Hamiltonian property but it's easier to have them here
+# end
 
 
 """
