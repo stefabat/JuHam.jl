@@ -1,0 +1,7 @@
+name = "JuHam"
+uuid = "b9dfd642-d024-4920-9fb3-a7a1fbe17687"
+version = "0.1.0"
+author = ["Stefano Battaglia <battaglia1803@gmail.com>"]
+
+[compat]
+julia = "1.3"

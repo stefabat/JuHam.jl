@@ -1,4 +1,7 @@
-using DataStructures.OrderedDict
+
+using DataStructures: OrderedDict
+using LinearAlgebra
+using DelimitedFiles
 
 """
     Molecule <: Topology
@@ -11,9 +14,10 @@ struct Molecule <: Topology
     types ::Array{String}
     coords::Array{AbstractFloat}
     bonds ::OrderedDict{Tuple{Int,Int},AbstractFloat}
+end
 
-    # Constructor
-    function Molecule(natoms, types, coords)
+# Outer Constructor
+function Molecule(natoms, types, coords)
     bonds = OrderedDict{Tuple{Int,Int},AbstractFloat}()
     for i = 1:natoms-1
         for j = i+1:natoms
@@ -23,15 +27,15 @@ struct Molecule <: Topology
             end
         end
     end
-    new(natoms, types, coords, bonds)
-    end
 
+return Molecule(natoms, types, coords, bonds)
 end
+
 
 "Read an xyz file and generate an object of type `Molecule`"
 function readxyz(input)
     f = open(input,"r")
-    natoms = parse(readline(f))
+    natoms = parse(Int,readline(f))
     atoms  = readdlm(f, skipstart=1)
     close(f)
     if natoms != size(atoms,1)

@@ -22,42 +22,37 @@ struct Huckel <: Model
 end
 
 
-"""
-    ExtendedHuckel <: Model
+# """
+#     ExtendedHuckel <: Model
 
-The extended Hückel model.
+# The extended Hückel model.
 
-    ExtendedHuckel()
+#     ExtendedHuckel()
 
-Create an extended Hückel model.
-"""
-struct ExtendedHuckel <: Model
-end
-
-
-"""
-    Hubbard <: Model
-
-The Hubbard model.
-
-    Hubbard(t, U, n)
-
-Create a Hubbard model with hopping `t` and on-site 2e repulsion `U`.
-Sites interacts at a maximal distance `n`.
-"""
-struct Hubbard <: Model
-    t::AbstractFloat    # Hopping integrals (like in TB)
-    U::AbstractFloat    # On-site repulsion
-    n::Integer          # Max distance of interaction for tij
-end
+# Create an extended Hückel model.
+# """
+# struct ExtendedHuckel <: Model
+# end
 
 
-struct PPP <: Model
-    t::AbstractFloat
-end
-# The dimerized simple Hueckel model
-# Assuming eta = beta1/beta2 and beta1+beta2=const
-struct DimHuckel <: Model
-    alpha::Float64      # Coulomb integral
-    eta  ::Float64      # beta1/beta2 ratio
-end
+# """
+#     Hubbard <: Model
+
+# The Hubbard model.
+
+#     Hubbard(t, U, N, d)
+
+# Create a Hubbard model with hopping `t`, on-site 2e repulsion `U` and `N` electrons.
+# `d` is the maximal distance of interaction between sites.
+# """
+# struct Hubbard <: Model
+#     t::AbstractFloat    # Hopping integrals (like in TB)
+#     U::AbstractFloat    # On-site repulsion
+#     N::Integer          # Number of electrons
+#     d::Integer          # Max distance of interaction for tij
+# end
+
+
+# struct PPP <: Model
+#     t::AbstractFloat
+# end

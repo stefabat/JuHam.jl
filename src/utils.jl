@@ -1,4 +1,6 @@
 
+using LinearAlgebra
+
 """
     floydwarshall(A::Matrix{Int})
 
@@ -8,7 +10,7 @@ Floyd-Warshall algorithm to find all-pairs shortest paths in O(n^3) time.
 one for every pair of connecting vertices and at least `N` for the rest.
 """
 function floydwarshall!(A::Matrix{Int})
-    assert(issymmetric(A))
+    @assert(issymmetric(A))
     N = size(A,1)
     for k = 1:N
         for i = 1:N
