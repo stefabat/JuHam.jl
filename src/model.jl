@@ -1,24 +1,33 @@
-"""
-    Model
 
-Abstract supertype for all physical models.
-"""
 abstract type Model end
 
+"""
+    TightBinding <: Model
+
+The `TightBinding` model with on-site integrals equal to `α` and
+hopping integrals equal to `β`.
+
+The on-site integral is α = ⟨ϕₘ|Ĥ|ϕₘ⟩
+The hopping integral is β = ⟨ϕₘ|Ĥ|ϕₙ⟩
+The overlap integral is γ = ⟨ϕₘ|ϕₙ⟩
+"""
+struct TightBinding <: Model
+    α::Float64      # on-site integral
+    β::Float64      # hopping integral
+    γ::Float64      # overlap integral
+end
+
 
 """
-    Huckel <: Model
+    huckel( β::Real)
 
-The Hückel model.
+Construct a `TightBinding` model which corresponds to the Hückel Hamiltonian.
 
-    Huckel(alpha::AbstractFloat, beta::AbstractFloat)
-
-Create a Hückel model with the on-site (Coulomb) integral equal to `alpha`
-and the hopping (resonance/bond) integral equal to `beta`.
+The on-site and overlap integrals `α` are assumed to be zero and only the
+hopping integral `β` has to be specified.
 """
-struct Huckel <: Model
-    alpha::AbstractFloat      # Coulomb integral
-    beta ::AbstractFloat      # Resonance/bond integral
+function huckel(β::Real)
+    return TightBinding(0.0, β, 0.0)
 end
 
 
@@ -50,9 +59,4 @@ end
 #     U::AbstractFloat    # On-site repulsion
 #     N::Integer          # Number of electrons
 #     d::Integer          # Max distance of interaction for tij
-# end
-
-
-# struct PPP <: Model
-#     t::AbstractFloat
 # end

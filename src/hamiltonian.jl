@@ -1,6 +1,4 @@
 
-using LinearAlgebra
-using SparseArrays
 
 """
     AbstractHamiltonian
@@ -9,49 +7,65 @@ Abstract supertype for all Hamiltonians.
 """
 abstract type AbstractHamiltonian end
 
+
 """
     Hamiltonian <: AbstractHamiltonian
 
-Define a Hamiltonian for a given physical `model` and `topology`.
-The Hamiltonian is expressed in the given `basis` and stored in `matrix`.
+Represent a `Model` Hamiltonian for a system with a given `Topology`.
 """
 struct Hamiltonian <: AbstractHamiltonian
-    model   ::Model                 # The model used to construct the Hamiltonian matrix
-    topology::Topology              # The topology of the system studied
-    basis   ::AbstractBasis         # The basis in which the Hamiltonian is expressed
-    matrix  ::Matrix{AbstractFloat}       # The actual matrix holding the data
+    model   ::Model                     # The model used to construct the Hamiltonian matrix
+    topology::Topology                  # The topology of the system studied
+    matrix  ::Matrix{Float64}           # The actual matrix holding the data
 end
 
 
 """
-    Hamiltonian(mod::Huckel, top::Chain)
+    Hamiltonian(model::TightBinding, topology::Chain)
 
-Hückel Hamiltonian for a 1D chain.
+Construct the tight-binding Hamiltonian for a one-dimensional `Chain`.
 """
-function Hamiltonian(mod::Huckel, top::Chain)
-    mat = SymTridiagonal(fill(mod.alpha,top.L),fill(mod.beta,top.L-1))
-    return Hamiltonian(mod, top, DummyBasis(), mat)
+function Hamiltonian(model::TightBinding, topology::Chain)
+    matrix = SymTridiagonal(fill(model.α,topology.L),fill(model.β,topology.L-1))
+    return Hamiltonian(model, topology, matrix)
 end
 
 
 """
-    Hamiltonian(mod::Huckel, top::Molecule)
+    Hamiltonian(model::TightBinding, molecule::Molecule)
 
-Hückel Hamiltonian for an arbitrary molecule.
+Construct the tight-binding Hamiltonian for a `Molecule`.
 
-Note that only carbon atoms are considered as interacting sites.
+All non-hydrogen atoms are considered as interacting centers.
 """
-function Hamiltonian(mod::Huckel, mol::Molecule)
-    n = count(el->isequal(el,"C"),mol.types)
-    # idx = find(el->isequal(el,"C"),mol.types)
-    idx = findall(el->isequal(el,"C"),mol.types)
-    top = Molecule(n, mol.types[idx], mol.coords[idx,:])
-    mat = diagm(fill(mod.alpha,n))
-    for key in keys(top.bonds)
-        mat[key[1],key[2]] = mat[key[2],key[1]] = mod.beta
+function Hamiltonian(model::TightBinding, molecule::Molecule)
+    # identify the indices of non-hydrogen atoms
+    ids = findall(!=("H"),molecule.atoms)
+    M = size(ids,1)
+    # create an MxM matrix with α on the diagonal
+    matrix = diagm(fill(model.α, M))
+
+    for j=1:M
+        for i=j+1:M
+            if molecule.D[ids[i],ids[j]] == 1
+                matrix[i,j] = matrix[j,i] = model.β
+            end
+        end
     end
-    @assert(issymmetric(mat))
-    return Hamiltonian(mod, top, DummyBasis(), mat)
+
+    return Hamiltonian(model, molecule, matrix)
+end
+
+
+
+"""
+    solve(H::Hamiltonian)
+
+Compute eigenvalues and eigenvectors of the `Hamiltonian` matrix.
+"""
+function solve(H::Hamiltonian)
+    # exact diagonalization
+    return eigen(H.matrix)
 end
 
 
@@ -87,19 +101,3 @@ end
 #     end
 #     return Hamiltonian(mod, top, basis, H)
 # end
-
-# Wrapper function to compute the orbital energies and the wavefunction
-function solve(H::Hamiltonian)
-    # Exact diagonalization
-    return eigen(H.matrix)
-end
-
-function distance(phi1, phi2)
-    # idx = find(xor.(phi1,phi2))
-    idx = findall(xor.(phi1,phi2))
-    if length(idx) > 0
-        return abs(idx[1]-idx[2])
-    else
-        return 0
-    end
-end

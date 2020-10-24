@@ -7,14 +7,19 @@ using SparseArrays
 
 
 include("lattice.jl")
+# structs
 export Chain
 
 include("molecule.jl")
+# structs
 export Molecule
 
 include("model.jl")
-include("basis.jl")
-# include("wavefunction.jl")
+# structs
+export TightBinding
+# functions
+export huckel
+
 include("hamiltonian.jl")
 
 
