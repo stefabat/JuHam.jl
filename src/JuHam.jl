@@ -2,6 +2,9 @@
 module JuHam
 
 using LinearAlgebra
+using DelimitedFiles
+using SparseArrays
+
 
 include("lattice.jl")
 export Chain
