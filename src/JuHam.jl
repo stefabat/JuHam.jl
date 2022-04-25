@@ -22,7 +22,8 @@ export huckel
 
 include("hamiltonian.jl")
 
-
+include("wavefunction.jl")
+export RBM, get_Nh, get_Nσ, log_psi, log_psi_over_psi, psi_over_psi, update_θ
 
 
 export readxyz

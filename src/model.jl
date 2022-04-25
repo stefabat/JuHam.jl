@@ -31,6 +31,12 @@ function huckel(β::Real)
 end
 
 
+struct Ising <: Model
+    hfield::Float64
+end
+
+
+
 # """
 #     ExtendedHuckel <: Model
 
